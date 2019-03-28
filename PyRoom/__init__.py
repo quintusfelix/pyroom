@@ -4,13 +4,15 @@
 
 __VERSION__ = '0.4.2'
 import locale
-try :
+try:
     locale.setlocale(locale.LC_ALL, '')
-except :
+except:
     locale.setlocale(locale.LC_ALL, 'C')
 
 import gettext
-import gtk
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
 
 import os
 from os.path import pardir, abspath, dirname, join
@@ -23,7 +25,6 @@ if not os.path.isdir(LOCALE_PATH):
 # setup translation
 languages_used = []
 lc, encoding = locale.getlocale()
-
 if lc:
     languages_used = [lc]
 lang_in_env = os.environ.get('LANGUAGE', None)
@@ -36,5 +37,5 @@ gettext.textdomain(GETTEXT_DOMAIN)
 translation = gettext.translation(GETTEXT_DOMAIN, LOCALE_PATH,
                                   languages=languages_used,
                                   fallback=True)
-import __builtin__
-__builtin__._ = translation.gettext
+import builtins
+builtins._ = translation.gettext

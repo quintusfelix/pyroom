@@ -24,10 +24,12 @@ basic global GUI
 Additionally allows user to apply custom settings
 """
 
-import gtk
-import gobject
-import pango
-import ConfigParser
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, Gdk
+from gi.repository import GObject
+from gi.repository import Pango
+import configparser
 import os
 from sys import platform
 if platform == 'win32':
@@ -35,8 +37,8 @@ if platform == 'win32':
 else:
     from xdg.BaseDirectory import xdg_data_home as data_home
 
-from pyroom_error import PyroomError
-from globals import state, config
+from .pyroom_error import PyroomError
+from .globals import state, config
 
 ORIENTATION = {
         'top':0,
@@ -44,12 +46,14 @@ ORIENTATION = {
         'bottom':1,
         }
 
+
 def calculate_real_tab_width(textview, tab_size):
     """calculate the width of `tab_size` spaces in the current font"""
     tab_string = tab_size * '0'
-    layout = pango.Layout(textview.get_pango_context())
-    layout.set_text(tab_string)
+    layout = Pango.Layout(textview.get_pango_context())
+    layout.set_text(tab_string, len(tab_string))
     return layout.get_size()[0]
+
 
 class Theme(dict):
     """basically a dict with some utility methods"""
@@ -58,7 +62,7 @@ class Theme(dict):
         theme_filename = self._lookup_theme(theme_name)
         if not theme_filename:
             raise PyroomError(_('theme not found: %s') % theme_name)
-        theme_file = ConfigParser.SafeConfigParser()
+        theme_file = configparser.ConfigParser()
         theme_file.read(theme_filename)
         self.update(theme_file.items('theme'))
 
@@ -91,21 +95,21 @@ class Theme(dict):
 
     def save(self, filename):
         """save a theme"""
-        theme_file = ConfigParser.SafeConfigParser()
+        theme_file = configparser.SafeConfigParser()
         theme_file.add_section('theme')
-        for key, value in self.iteritems():
+        for key, value in self.items():
             theme_file.set('theme', key, str(value))
         theme_file.set('theme', 'name', os.path.basename(filename))
         theme_file.write(open(filename + '.theme', 'w'))
 
-class FadeLabel(gtk.Label):
+class FadeLabel(Gtk.Label):
     """ GTK Label with timed fade out effect """
 
     active_duration = 3000  # Fade start after this time
     fade_duration = 1500.0  # Fade duration
 
     def __init__(self, message='', active_color=None, inactive_color=None):
-        gtk.Label.__init__(self, message)
+        Gtk.Label.__init__(self, message)
         if not active_color:
             active_color = '#ffffff'
         self.active_color = active_color
@@ -121,30 +125,30 @@ class FadeLabel(gtk.Label):
         @param duration: duration in miliseconds"""
         if not duration:
             duration = self.active_duration
-        self.modify_fg(gtk.STATE_NORMAL,
-                       gtk.gdk.color_parse(self.active_color))
-        gtk.Label.set_text(self, message)
+        self.modify_fg(Gtk.StateType.NORMAL,
+                       Gdk.color_parse(self.active_color))
+        Gtk.Label.set_text(self, message)
         if self.idle:
-            gobject.source_remove(self.idle)
-        self.idle = gobject.timeout_add(duration, self.fade_start)
+            GObject.source_remove(self.idle)
+        self.idle = GObject.timeout_add(duration, self.fade_start)
 
     def fade_start(self):
         """start fading timer"""
         self.fade_level = 1.0
         if self.idle:
-            gobject.source_remove(self.idle)
-        self.idle = gobject.timeout_add(25, self.fade_out)
+            GObject.source_remove(self.idle)
+        self.idle = GObject.timeout_add(25, self.fade_out)
 
     def fade_out(self):
         """now fade out"""
-        color = gtk.gdk.color_parse(self.inactive_color)
+        color = Gdk.color_parse(self.inactive_color)
         (red1, green1, blue1) = (color.red, color.green, color.blue)
-        color = gtk.gdk.color_parse(self.active_color)
+        color = Gdk.color_parse(self.active_color)
         (red2, green2, blue2) = (color.red, color.green, color.blue)
         red = red1 + int(self.fade_level * (red2 - red1))
         green = green1 + int(self.fade_level * (green2 - green1))
         blue = blue1 + int(self.fade_level * (blue2 - blue1))
-        self.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(red, green, blue))
+        self.modify_fg(Gtk.StateType.NORMAL, Gdk.Color(red, green, blue))
         self.fade_level -= 1.0 / (self.fade_duration / 25)
         if self.fade_level > 0:
             return True
@@ -156,78 +160,79 @@ class GUI(object):
 
     def __init__(self):
         # Theme
-        theme_name = config.get('visual', 'theme')
+        theme_name = config.get('visual', 'theme', )
         self.theme = Theme(theme_name)
         self.status = FadeLabel()
-        
+
         # Main window
 
-        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
         self.window.set_name('PyRoom')
         self.window.set_title("PyRoom")
         self.window.connect('delete_event', self.delete_event)
         self.window.connect('destroy', self.destroy)
 
-        self.textbox = gtk.TextView()
+        self.textbox = Gtk.TextView()
         self.textbox.connect('scroll-event', self.scroll_event)
-        self.textbox.set_wrap_mode(gtk.WRAP_WORD)
+        self.textbox.set_wrap_mode(Gtk.WrapMode.WORD)
 
-        self.fixed = gtk.Fixed()
-        self.vbox = gtk.VBox()
-        self.align = gtk.Alignment()
+        self.vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.align = Gtk.Alignment()
         self.align.add(self.vbox)
         self.window.add(self.align)
 
-        self.boxout = gtk.EventBox()
+        self.boxout = Gtk.EventBox()
         self.boxout.set_border_width(1)
-        self.boxin = gtk.EventBox()
+        self.boxin = Gtk.EventBox()
         self.boxin.set_border_width(1)
         self.vbox.pack_start(self.boxout, True, True, 1)
         self.boxout.add(self.boxin)
 
-        self.scrolled = gtk.ScrolledWindow()
+        self.scrolled = Gtk.ScrolledWindow()
         self.boxin.add(self.scrolled)
         self.scrolled.add(self.textbox)
-        self.scrolled.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_NEVER)
+        self.scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         self.scrolled.show()
-        self.scrolled.set_property('resize-mode', gtk.RESIZE_PARENT)
-        self.textbox.set_property('resize-mode', gtk.RESIZE_PARENT)
-        self.vbox.set_property('resize-mode', gtk.RESIZE_PARENT)
+        self.scrolled.set_resize_mode(Gtk.ResizeMode.PARENT)
+        self.textbox.set_resize_mode(Gtk.ResizeMode.PARENT)
+        self.vbox.set_resize_mode(Gtk.ResizeMode.PARENT)
         self.vbox.show_all()
 
         # Status
-        self.hbox = gtk.HBox()
+        self.hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.hbox.set_spacing(12)
         self.hbox.pack_end(self.status, True, True, 0)
         self.vbox.pack_end(self.hbox, False, False, 0)
         self.status.set_alignment(0.0, 0.5)
-        self.status.set_justify(gtk.JUSTIFY_LEFT)
-        
+        self.status.set_justify(Gtk.Justification.LEFT)
+
         self.apply_theme()
 
     def apply_theme(self):
         """immediately apply the theme given in configuration
-
         this has changed from previous versions! Takes no arguments!
         Only uses configuration!"""
-        
+
         # text cursor
-        gtkrc_string = """\
-        style "pyroom-colored-cursor" { 
-        GtkTextView::cursor-color = '%s'
-        bg_pixmap[NORMAL] = "<none>"
-        }
-        class "GtkWidget" style "pyroom-colored-cursor"
-        """ % self.theme['foreground']
-        gtk.rc_parse_string(gtkrc_string)
+        caret_color = Gdk.RGBA()
+        caret_color.parse(self.theme['foreground'])
+        style_provider = Gtk.CssProvider()
+        style_provider.load_from_data(
+            bytes("textview * { caret-color: %s; }" % caret_color.to_string(),
+                  encoding='utf-8'))
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(),
+            style_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
 
         padding = int(self.theme['padding'])
         self.textbox.set_border_width(padding)
         
         # Screen geometry
-        screen = gtk.gdk.screen_get_default() 
+        screen = Gdk.Screen.get_default()
         root_window = screen.get_root_window() 
-        mouse_x, mouse_y, mouse_mods = root_window.get_pointer()
+        window, mouse_x, mouse_y, mouse_mods = root_window.get_pointer()
         current_monitor_number = screen.get_monitor_at_point(mouse_x, mouse_y)
         monitor_geometry = screen.get_monitor_geometry(current_monitor_number)
         (screen_width, screen_height) = (monitor_geometry.width,
@@ -242,21 +247,21 @@ class GUI(object):
             int(height_percentage * screen_height)
         )
 
-        parse_color = lambda x: gtk.gdk.color_parse(self.theme[x])
+        parse_color = lambda x: Gdk.color_parse(self.theme[x])
         # Colors
-        self.window.modify_bg(gtk.STATE_NORMAL, parse_color('background'))
-        self.boxout.modify_bg(gtk.STATE_NORMAL, parse_color('border'))
+        self.window.modify_bg(Gtk.StateType.NORMAL, parse_color('background'))
+        self.boxout.modify_bg(Gtk.StateType.NORMAL, parse_color('border'))
         self.status.active_color = self.theme['foreground']
         self.status.inactive_color = self.theme['background']
-        self.textbox.modify_bg(gtk.STATE_NORMAL, parse_color('textboxbg'))
-        self.textbox.modify_base(gtk.STATE_NORMAL, parse_color('textboxbg'))
-        self.textbox.modify_base(gtk.STATE_SELECTED, parse_color('foreground'))
-        self.textbox.modify_text(gtk.STATE_NORMAL, parse_color('foreground'))
-        self.textbox.modify_text(gtk.STATE_SELECTED, parse_color('textboxbg'))
-        self.textbox.modify_fg(gtk.STATE_NORMAL, parse_color('foreground'))
+        self.textbox.modify_bg(Gtk.StateType.NORMAL, parse_color('textboxbg'))
+        self.textbox.modify_base(Gtk.StateType.NORMAL, parse_color('textboxbg'))
+        self.textbox.modify_base(Gtk.StateType.SELECTED, parse_color('foreground'))
+        self.textbox.modify_text(Gtk.StateType.NORMAL, parse_color('foreground'))
+        self.textbox.modify_text(Gtk.StateType.SELECTED, parse_color('textboxbg'))
+        self.textbox.modify_fg(Gtk.StateType.NORMAL, parse_color('foreground'))
 
         # Border
-        if not int(config.get('visual', 'showborder')):
+        if not int(config.get('visual', 'showborder', )):
             self.boxin.set_border_width(0)
             self.boxout.set_border_width(0)
         else:
@@ -270,15 +275,15 @@ class GUI(object):
         else:
             font_type = config.get('visual', 'use_font_type')
             new_font = state['gnome_fonts'][font_type]
-        self.textbox.modify_font(pango.FontDescription(new_font))
-        tab_width = pango.TabArray(1, False)
-        tab_width.set_tab(0, pango.TAB_LEFT,
-                calculate_real_tab_width(self.textbox, 4)
-        )
+        self.textbox.modify_font(Pango.FontDescription(new_font))
+        tab_width = Pango.TabArray(1, False)
+        tab_width.set_tab(0, Pango.TabAlign.LEFT,
+                          calculate_real_tab_width(self.textbox, 4)
+                          )
         self.textbox.set_tabs(tab_width)
 
         # Indent
-        if config.get('visual', 'indent') == '1':
+        if config.get('visual', 'indent', ) == '1':
             pango_context = self.textbox.get_pango_context()
             current_font_size = pango_context.\
                     get_font_description().\
@@ -303,7 +308,7 @@ class GUI(object):
 
     def quit(self):
         """ quit pyroom """
-        gtk.main_quit()
+        Gtk.main_quit()
 
     def delete_event(self, widget, event, data=None):
         """ Quit """
@@ -312,14 +317,14 @@ class GUI(object):
 
     def destroy(self, widget, data=None):
         """ Quit """
-        gtk.main_quit()
+        Gtk.main_quit()
 
     def scroll_event(self, widget, event):
         """ Scroll event dispatcher """
 
-        if event.direction == gtk.gdk.SCROLL_UP:
+        if event.direction == Gdk.ScrollDirection.UP:
             self.scroll_up()
-        elif event.direction == gtk.gdk.SCROLL_DOWN:
+        elif event.direction == Gdk.ScrollDirection.DOWN:
             self.scroll_down()
 
     def scroll_down(self):

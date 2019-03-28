@@ -22,14 +22,14 @@
 """
 provide autosave functions
 """
-import gobject
-from pyroom_error import PyroomError
+from gi.repository import GObject
+from .pyroom_error import PyroomError
+from .globals import config
 import os
-from globals import config
 
 def start_autosave(edit_instance):
     """start the autosave timer"""
-    timeout_id = gobject.timeout_add(1000, autosave_timeout, edit_instance)
+    timeout_id = GObject.timeout_add(1000, autosave_timeout, edit_instance)
     edit_instance.autosave_timeout_id = timeout_id
     edit_instance.autosave_elapsed = 0
 
@@ -40,7 +40,7 @@ def stop_autosave(edit_instance):
         if not buf.filename == edit_instance.UNNAMED_FILENAME and \
            os.path.isfile(autosave_fn):
             os.remove(autosave_fn)
-    gobject.source_remove(edit_instance.autosave_timeout_id)
+    GObject.source_remove(edit_instance.autosave_timeout_id)
 
 def autosave_timeout(edit_instance):
     """see if we have to autosave open files"""

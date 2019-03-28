@@ -33,15 +33,17 @@ Based on code posted on ubuntu forums by NoWhereMan (www.nowhereland.it)
 
 from optparse import OptionParser
 import sys
-
-import gtk
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
 
 import PyRoom
-from basic_edit import BasicEdit
-from pyroom_error import handle_error
-from globals import state
+from .basic_edit import BasicEdit
+from .pyroom_error import handle_error
+from .globals import state
 
 __VERSION__ = PyRoom.__VERSION__
+
 
 def main():
     sys.excepthook = handle_error
@@ -71,7 +73,8 @@ simply and efficiently in a full-screen window, with no distractions.'))
     state['edit_instance'].status.set_text(
         _('Welcome to Pyroom %s, type Control-H for help') % __VERSION__
     )
-    gtk.main()
+    Gtk.main()
+
 
 if __name__ == '__main__':
     main()

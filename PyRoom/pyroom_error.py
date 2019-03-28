@@ -24,9 +24,11 @@ Errors raised within pyroom
 
 """
 
-import gtk, pango
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, Gdk
+from gi.repository import Pango
 import traceback
-from exceptions import KeyboardInterrupt
 
 class PyroomError(Exception):
     """our nice little exception"""
@@ -43,29 +45,29 @@ def handle_error(exception_type, exception_value, exception_traceback):
 This is most likely a programming error. \
 Please submit a bug report to launchpad""")
 
-    error_dialog = gtk.MessageDialog(parent=None, flags=gtk.DIALOG_MODAL,
-                type=gtk.MESSAGE_ERROR, buttons=gtk.BUTTONS_NONE,
+    error_dialog = Gtk.MessageDialog(parent=None, flags=Gtk.DialogFlags.MODAL,
+                type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.NONE,
                 message_format=message)
     error_dialog.set_title(_('Error'))
-    error_dialog.add_button(gtk.STOCK_OK, gtk.RESPONSE_OK)
+    error_dialog.add_button(Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT)
     if not exception_type == PyroomError:
         error_dialog.add_button (_("Details..."), 2)
-    error_dialog.set_position(gtk.WIN_POS_CENTER)
-    error_dialog.set_gravity(gtk.gdk.GRAVITY_CENTER)
+    error_dialog.set_position(Gtk.WindowPosition.CENTER)
+    error_dialog.set_gravity(Gdk.Gravity.CENTER)
     error_dialog.show_all()
 
-    details_textview = gtk.TextView()
+    details_textview = Gtk.TextView()
     details_textview.show()
     details_textview.set_editable(False)
-    details_textview.modify_font(pango.FontDescription('Monospace'))
+    details_textview.modify_font(Pango.FontDescription('Monospace'))
 
-    scrolled_window = gtk.ScrolledWindow()
+    scrolled_window = Gtk.ScrolledWindow()
     scrolled_window.show()
-    scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+    scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
     scrolled_window.add(details_textview)
 
-    frame = gtk.Frame()
-    frame.set_shadow_type(gtk.SHADOW_IN)
+    frame = Gtk.Frame()
+    frame.set_shadow_type(Gtk.ShadowType.IN)
     frame.add(scrolled_window)
     frame.set_border_width(6)
     error_dialog.vbox.add(frame)
@@ -80,8 +82,8 @@ Please submit a bug report to launchpad""")
     )
     details_buffer.set_text(printable_traceback)
     details_textview.set_size_request(
-        gtk.gdk.screen_width()/2,
-        gtk.gdk.screen_height()/3
+        Gdk.Screen.width()/2,
+        Gdk.Screen.height()/3
     )
 
     error_dialog.details = frame

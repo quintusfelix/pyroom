@@ -22,7 +22,7 @@ for po in glob.glob(os.path.join(PO_DIR, '*.po')):
     try:
         return_code = call(['msgfmt', '-o', mo, po])
     except OSError:
-        print 'Translation not available, please install gettext'
+        print('Translation not available, please install gettext')
         break
     if return_code:
         raise Warning('Error when building locales')
@@ -45,12 +45,12 @@ class InstallData(install_data):
 
 setup(
   name='PyRoom',
-  version = '0.4.1',
+  version = '0.4.2',
   url = url,
   author = author,
   description = 'PyRoom is a distraction-free, fullscreen text editor',
   packages = ['PyRoom',],
-  package_data = {'PyRoom':['interface.glade', 'preferences.glade']},
+  package_data = {'PyRoom':['interface.ui', 'preferences.ui']},
   data_files = [
     ('/usr/share/pyroom/themes', glob.glob('themes/*.theme')),
     ('/usr/share/pyroom', ['pyroom.png']),

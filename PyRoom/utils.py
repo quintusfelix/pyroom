@@ -23,7 +23,7 @@ helper functions
 """
 
 import os
-from ConfigParser import SafeConfigParser, NoOptionError, NoSectionError
+from configparser import ConfigParser, NoOptionError, NoSectionError
 # avoiding circular imports, actual import is below!
 # from globals import state
 
@@ -45,23 +45,23 @@ DEFAULT_CONF = {
     },
 }
 
-class FailsafeConfigParser(SafeConfigParser):
+class FailsafeConfigParser(ConfigParser):
     """
-    Config parser that returns default values 
+    Config parser that returns default values
 
     Two reasons for implementation: we don't want pyroom to break while
-    running on legacy configuration files. Second reason: standard 
-    'defaults' behaviour of ConfigParser is stupid, doesn't allow for 
-    sections and works with a lot of magic. 
+    running on legacy configuration files. Second reason: standard
+    'defaults' behaviour of ConfigParser is stupid, doesn't allow for
+    sections and works with a lot of magic.
     """
-    def get(self, section, option):
+    def get(self, section, option, **kw):
         """
         return default values instead of breaking
 
         this is a drop-in replacement for standard get from ConfigParser
         """
         try:
-            return SafeConfigParser.get(self, section, option)
+            return ConfigParser.get(self, section, option, raw=True)
         except NoOptionError:
             try:
                 default_value = DEFAULT_CONF[section][option]
@@ -75,7 +75,8 @@ class FailsafeConfigParser(SafeConfigParser):
 
 # yes imports that are not quite obvious suck but we need to avoid
 # circular imports here
-from globals import state
+from .globals import state
+
 
 def build_default_conf():
     """builds necessary default conf.
@@ -99,6 +100,7 @@ def build_default_conf():
     if not os.path.isdir(state['themes_dir']):
         os.makedirs(state['themes_dir'])
 
+
 def get_themes_list():
     """get all the theme files sans file suffix and the custom theme"""
     themeslist = []
@@ -114,5 +116,4 @@ def get_themes_list():
             if not themefile[:-6] in themeslist:
                 themeslist.append(themefile[:-6])
     return themeslist
-
 

@@ -25,15 +25,18 @@ contains basic functions needed for pyroom - any core functionality is included
 within this file
 """
 
-import gtk
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, Gdk
+from gi.repository import GObject
 import os
 import urllib
 
-from pyroom_error import PyroomError
-from gui import GUI
-from preferences import Preferences
-import autosave
-from globals import state, config
+from .pyroom_error import PyroomError
+from .gui import GUI
+from .preferences import Preferences
+from . import autosave
+from .globals import state, config
 
 FILE_UNNAMED = _('* Unnamed *')
 
@@ -75,6 +78,7 @@ Commands:
 
 """) % KEY_BINDINGS
 
+
 def get_likely_chooser_path(buffers, current):
     """determine where the user might want to start browsing open/save dialogs
 
@@ -82,17 +86,17 @@ def get_likely_chooser_path(buffers, current):
     if len(buffers) > 0:
         # search in both directions for named buffers, backwards first
         directions = (
-                (range(current, 0, -1)),
-                (range(current, len(buffers), 1))
+            (range(current, 0, -1)),
+            (range(current, len(buffers), 1))
         )
         for direction in directions:
             for buf_num in direction:
                 if buffers[buf_num].filename != FILE_UNNAMED:
                     return os.path.dirname(
-                            os.path.abspath(
-                             buffers[buf_num].filename
-                             )
-                            )
+                        os.path.abspath(
+                            buffers[buf_num].filename
+                        )
+                    )
 
 def dispatch(*args, **kwargs):
     """call the method passed as args[1] without passing other arguments"""
@@ -119,33 +123,34 @@ def make_accel_group(edit_instance):
         'z': edit_instance.undo,
         'm': edit_instance.dialog_minimize,
     }
-    ag = gtk.AccelGroup()
-    for key, value in keybindings.items():
-        ag.connect_group(
+    ag = Gtk.AccelGroup()
+    for key, value in list(keybindings.items()):
+        ag.connect(
             ord(key),
-            gtk.gdk.CONTROL_MASK,
-            gtk.ACCEL_VISIBLE,
+            Gdk.ModifierType.CONTROL_MASK,
+            Gtk.AccelFlags.VISIBLE,
             dispatch(value)
         )
-    ag.connect_group(
+    ag.connect(
         ord('s'),
-        gtk.gdk.CONTROL_MASK|gtk.gdk.SHIFT_MASK,
-        gtk.ACCEL_VISIBLE,
+        Gdk.ModifierType.CONTROL_MASK|Gdk.ModifierType.SHIFT_MASK,
+        Gtk.AccelFlags.VISIBLE,
         dispatch(edit_instance.save_file_as)
     )
     return ag
 
 def define_keybindings(edit_instance):
     """define keybindings, respectively to keyboard layout"""
-    keymap = gtk.gdk.keymap_get_default()
+    keymap = Gdk.Keymap.get_default()
     basic_bindings = {
-        gtk.keysyms.Page_Up: edit_instance.prev_buffer,
-        gtk.keysyms.Page_Down: edit_instance.next_buffer,
+        Gdk.KEY_Page_Up: edit_instance.prev_buffer,
+        Gdk.KEY_Page_Down: edit_instance.next_buffer,
     }
     translated_bindings = {}
-    for key, value in basic_bindings.items():
-        hardware_keycode = keymap.get_entries_for_keyval(key)[0][0]
-        translated_bindings[hardware_keycode] = value
+    for key, value in list(basic_bindings.items()):
+        key_is_found, hardware_keycode = keymap.get_entries_for_keyval(key)
+        if key_is_found:
+            translated_bindings[hardware_keycode[0]] = value
     return translated_bindings
 
 class UndoableInsert(object):
@@ -162,7 +167,7 @@ class UndoableInsert(object):
 class UndoableDelete(object):
     """something that has ben deleted from our textbuffer"""
     def __init__(self, text_buffer, start_iter, end_iter):
-        self.deleted_text = text_buffer.get_text(start_iter, end_iter)
+        self.deleted_text = text_buffer.get_text(start_iter, end_iter, False)
         self.start = start_iter.get_offset()
         self.end = end_iter.get_offset()
         # need to find out if backspace or delete key has been used
@@ -177,17 +182,17 @@ class UndoableDelete(object):
         else:
             self.mergeable = True
 
-class UndoableBuffer(gtk.TextBuffer):
+class UndoableBuffer(Gtk.TextBuffer):
     """text buffer with added undo capabilities
 
-    designed as a drop-in replacement for gtksourceview,
+    designed as a drop-in replacement for Gtksourceview,
     at least as far as undo is concerned"""
 
     def __init__(self):
         """
         we'll need empty stacks for undo/redo and some state keeping
         """
-        gtk.TextBuffer.__init__(self)
+        Gtk.TextBuffer.__init__(self)
         self.undo_stack = []
         self.redo_stack = []
         self.modified = False
@@ -377,7 +382,7 @@ class BasicEdit(object):
         state['gui'] = gui
         self.preferences = Preferences()
         try:
-            self.recent_manager = gtk.recent_manager_get_default()
+            self.recent_manager = Gtk.RecentManager.get_default()
         except AttributeError:
             self.recent_manager = None
         self.status = gui.status
@@ -398,16 +403,16 @@ class BasicEdit(object):
         self.window.fullscreen()
 
         # Handle multiple monitors
-        screen = gtk.gdk.screen_get_default()
+        screen = Gdk.Screen.get_default()
         root_window = screen.get_root_window()
-        mouse_x, mouse_y, mouse_mods = root_window.get_pointer()
+        root_window, mouse_x, mouse_y, mouse_mods = root_window.get_pointer()
         current_monitor_number = screen.get_monitor_at_point(mouse_x, mouse_y)
         monitor_geometry = screen.get_monitor_geometry(current_monitor_number)
         self.window.move(monitor_geometry.x, monitor_geometry.y)
 
         # Defines the glade file functions for use on closing a buffer or exit
-        gladefile = os.path.join(state['absolute_path'], "interface.glade")
-        builder = gtk.Builder()
+        gladefile = os.path.join(state['absolute_path'], "interface.ui")
+        builder = Gtk.Builder()
         builder.add_from_file(gladefile)
         self.dialog = builder.get_object("SaveBuffer")
         self.dialog.set_transient_for(self.window)
@@ -424,13 +429,10 @@ class BasicEdit(object):
         builder.connect_signals(dic)
 
         self.keybindings = define_keybindings(self)
-        # this sucks, shouldn't have to call this here, textbox should
-        # have its background and padding color from GUI().__init__() already
-        gui.apply_theme()
 
     def key_press_event(self, widget, event):
         """ key press event dispatcher """
-        if event.state & gtk.gdk.CONTROL_MASK:
+        if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             if event.hardware_keycode in self.keybindings:
                 self.keybindings[event.hardware_keycode]()
                 return True
@@ -478,28 +480,28 @@ class BasicEdit(object):
 
         returns True if proposal is accepted
         returns False in any other case (declined/dialog closed)"""
-        restore_dialog = gtk.Dialog(
+        restore_dialog = Gtk.Dialog(
             title=_('Restore backup?'),
             parent=self.window,
-            flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+            flags=Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
             buttons=(
-                gtk.STOCK_DISCARD, gtk.RESPONSE_REJECT,
-                gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT
+                Gtk.STOCK_DISCARD, Gtk.ResponseType.REJECT,
+                Gtk.STOCK_OPEN, Gtk.ResponseType.ACCEPT
             )
         )
-        question_asked = gtk.Label(
+        question_asked = Gtk.Label(label=
             _('''Backup information for this file has been found.
 Open those instead of the original file?''')
         )
         question_asked.set_line_wrap(True)
 
-        question_sign = gtk.image_new_from_stock(
-            stock_id=gtk.STOCK_DIALOG_QUESTION,
-            size=gtk.ICON_SIZE_DIALOG
+        question_sign = Gtk.Image.new_from_stock(
+            stock_id=Gtk.STOCK_DIALOG_QUESTION,
+            size=Gtk.IconSize.DIALOG
         )
         question_sign.show()
 
-        hbox = gtk.HBox()
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         hbox.pack_start(question_sign, True, True, 0)
         hbox.pack_start(question_asked, True, True, 0)
         hbox.show()
@@ -507,7 +509,7 @@ Open those instead of the original file?''')
             hbox, True, True, 0
         )
 
-        restore_dialog.set_default_response(gtk.RESPONSE_ACCEPT)
+        restore_dialog.set_default_response(Gtk.ResponseType.ACCEPT)
         restore_dialog.show_all()
         resp = restore_dialog.run()
         restore_dialog.destroy()
@@ -516,11 +518,11 @@ Open those instead of the original file?''')
     def open_file(self):
         """ Open file """
 
-        chooser = gtk.FileChooserDialog('PyRoom', self.window,
-                gtk.FILE_CHOOSER_ACTION_OPEN,
-                buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-        chooser.set_default_response(gtk.RESPONSE_OK)
+        chooser = Gtk.FileChooserDialog('PyRoom', self.window,
+                Gtk.FileChooserAction.OPEN,
+                buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+        chooser.set_default_response(Gtk.ResponseType.OK)
         buf = self.buffers[self.current]
         if buf.filename != FILE_UNNAMED:
             chooser.set_current_folder(
@@ -531,7 +533,7 @@ Open those instead of the original file?''')
             if chooser_path:
                 chooser.set_current_folder(chooser_path)
         res = chooser.run()
-        if res == gtk.RESPONSE_OK:
+        if res == Gtk.ResponseType.OK:
             self.open_file_no_chooser(chooser.get_filename())
         else:
             self.status.set_text(_('Closed, no files selected'))
@@ -560,11 +562,12 @@ Open those instead of the original file?''')
             buffer_file = open(filename_to_open, 'r')
             buf = self.buffers[self.current]
             buf.begin_not_undoable_action()
-            utf8 = unicode(buffer_file.read(), 'utf-8')
+            utf8 = str(buffer_file.read(), 'utf-8')
             buf.set_text(utf8)
             buf.end_not_undoable_action()
             buffer_file.close()
-        except IOError, (errno, strerror):
+        except IOError as unable_to_open_file:
+            (errno, strerror) = unable_to_open_file.args
             errortext = _('Unable to open %(filename)s.') % {
                 'filename': filename_to_open
             }
@@ -589,7 +592,7 @@ the file.')
                 buffer_file.write(txt)
                 if self.recent_manager:
                     self.recent_manager.add_full(
-                        "file://" + urllib.quote(buf.filename),
+                        "file://" + urllib.parse.quote(buf.filename),
                         {
                             'mime_type':'text/plain',
                             'app_name':'pyroom',
@@ -605,7 +608,8 @@ the file.')
             else:
                 self.save_file_as()
                 return
-        except IOError, (errno, strerror):
+        except IOError as unable_to_save:
+            (errno, strerror) = unable_to_save.args
             errortext = _('Unable to save %(filename)s.') % {
                 'filename': buf.filename}
             if errno == 13:
@@ -620,11 +624,11 @@ the file.')
         """ Save file as """
 
         buf = self.buffers[self.current]
-        chooser = gtk.FileChooserDialog('PyRoom', self.window,
-                gtk.FILE_CHOOSER_ACTION_SAVE,
-                buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                gtk.STOCK_SAVE, gtk.RESPONSE_OK))
-        chooser.set_default_response(gtk.RESPONSE_OK)
+        chooser = Gtk.FileChooserDialog('PyRoom', self.window,
+                Gtk.FileChooserAction.SAVE,
+                buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+        chooser.set_default_response(Gtk.ResponseType.OK)
         chooser.set_do_overwrite_confirmation(True)
         if buf.filename != FILE_UNNAMED:
             chooser.set_filename(buf.filename)
@@ -633,7 +637,7 @@ the file.')
             if chooser_path:
                 chooser.set_current_folder(chooser_path)
         res = chooser.run()
-        if res == gtk.RESPONSE_OK:
+        if res == Gtk.ResponseType.OK:
             buf.filename = chooser.get_filename()
             self.save_file()
         else:
@@ -736,7 +740,7 @@ continue editing your document.")
         self.set_buffer(self.current)
         state['gui'].textbox.scroll_to_mark(
             self.buffers[self.current].get_insert(),
-            0.0,
+            0.0, False, .0, .0,
         )
 
     def prev_buffer(self):

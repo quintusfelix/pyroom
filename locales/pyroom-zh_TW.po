@@ -52,7 +52,7 @@ msgstr ""
 #: trunk/PyRoom/interface.glade.h:10
 msgid ""
 "<b>Warning!</b>\n"
-"You are about to quit leaving documents with unsaved changes. If you continue, you will loose any changes that you have made."
+"You are about to quit leaving documents with unsaved changes. If you continue, you will lose any changes that you have made."
 msgstr ""
 "<b>警告！</b>\n"
 "您正試圖離開 PyRoom，而尚有檔案未被儲存。如果繼續，所有的變更將會丟失。"

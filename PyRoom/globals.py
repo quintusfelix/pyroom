@@ -49,7 +49,7 @@ def get_gnome_fonts():
     try:
         for font in fonts.keys():
             fonts[font] = gconf_client.get_value(
-                '/desktop/gnome/interface/%s_font_name' % 
+                '/desktop/gnome/interface/%s_font_name' %
                 font
             )
     except ValueError:
@@ -77,11 +77,11 @@ if not os.path.isdir(state['global_themes_dir']):
 
 # yes imports that are not quite obvious suck but we need to avoid
 # circular imports here
-from utils import FailsafeConfigParser            
+from .utils import FailsafeConfigParser
 config = FailsafeConfigParser()
 config_file = os.path.join(state['conf_dir'], 'pyroom.conf')
 if os.path.isfile(config_file):
-    config.readfp(open(config_file, 'r'))
+    config.read_file(open(config_file, 'r'))
 for d in [state['conf_dir'], state['themes_dir']]:
     if not os.path.isdir(d):
         os.makedirs(d)

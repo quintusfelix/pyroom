@@ -26,19 +26,22 @@ the choice of a theme from $XDG_DATA_HOME/pyroom/themes as well as a custom
 theme created via the dialog
 """
 
-import gtk
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, Gdk
 import os
 
-from gui import Theme
-from pyroom_error import PyroomError
-from globals import state, config
-from utils import get_themes_list, FailsafeConfigParser
+from .gui import Theme
+from .pyroom_error import PyroomError
+from .globals import state, config
+from .utils import get_themes_list, FailsafeConfigParser
+
 
 class Preferences(object):
     """our main preferences object, to be passed around where needed"""
     def __init__(self):
-        gladefile = os.path.join(state['absolute_path'], "preferences.glade")
-        builder = gtk.Builder()
+        gladefile = os.path.join(state['absolute_path'], "preferences.ui")
+        builder = Gtk.Builder()
         builder.add_from_file(gladefile)
 
         # Defining widgets needed
@@ -59,22 +62,22 @@ class Preferences(object):
         self.autosave_spinbutton = builder.get_object("autosavetime")
         self.linespacing_spinbutton = builder.get_object("linespacing")
         self.indent_check = builder.get_object("indent_check")
-        if config.get('visual', 'indent') == '1':
+        if config.get('visual', 'indent', ) == '1':
             self.indent_check.set_active(True)
         self.save_custom_button = builder.get_object("save_custom_theme")
         self.custom_font_preference = builder.get_object("fontbutton1")
-        if not config.get('visual', 'use_font_type') == 'custom':
+        if not config.get('visual', 'use_font_type', ) == 'custom':
             self.custom_font_preference.set_sensitive(False)
         self.font_radios = {
-            'document':builder.get_object("radio_document_font"),
-            'monospace':builder.get_object("radio_monospace_font"),
-            'custom':builder.get_object("radio_custom_font")
+            'document': builder.get_object("radio_document_font"),
+            'monospace': builder.get_object("radio_monospace_font"),
+            'custom': builder.get_object("radio_custom_font")
         }
         self.orientation_radios = {
-                'top':builder.get_object('orientation_top'),
-                'center':builder.get_object('orientation_center'),
+                'top': builder.get_object('orientation_top'),
+                'center': builder.get_object('orientation_center'),
                 }
-        for widget in self.font_radios.values():
+        for widget in list(self.font_radios.values()):
             if not widget.get_name() == 'radio_custom_font':
                 widget.set_sensitive(bool(state['gnome_fonts']))
 
@@ -114,7 +117,7 @@ class Preferences(object):
         self.stylesvalues = {'custom': 0}
         startingvalue = 1
 
-        state['gui'].theme = Theme(config.get('visual', 'theme'))
+        state['gui'].theme = Theme(config.get('visual', 'theme', ))
         # Add themes to combobox
         for i in get_themes_list():
             self.stylesvalues['%s' % (i)] = startingvalue
@@ -131,7 +134,7 @@ class Preferences(object):
         dic = {
                 "on_MainWindow_destroy": self.QuitEvent,
                 "on_button-ok_clicked": self.set_preferences,
-                "on_close": self.kill_preferences
+                "on_close": self.kill_preferences,
                 }
         builder.connect_signals(dic)
 
@@ -154,9 +157,9 @@ class Preferences(object):
         self.heightpreference.connect('value-changed', self.customchanged)
         self.widthpreference.connect('value-changed', self.customchanged)
         self.save_custom_button.connect('clicked', self.save_custom_theme)
-        for widget in self.font_radios.values():
+        for widget in list(self.font_radios.values()):
             widget.connect('toggled', self.change_font)
-        for widget in self.orientation_radios.values():
+        for widget in list(self.orientation_radios.values()):
             widget.connect('toggled', self.change_orientation)
         self.custom_font_preference.connect('font-set', self.change_font)
 
@@ -182,13 +185,13 @@ class Preferences(object):
     def get_custom_data(self):
         """reads custom themes"""
         custom_settings = dict(
-            foreground = gtk.gdk.Color.to_string(
+            foreground = Gdk.Color.to_string(
                                     self.colorpreference.get_color()),
-            textboxbg = gtk.gdk.Color.to_string(
+            textboxbg = Gdk.Color.to_string(
                                     self.textboxbgpreference.get_color()),
-            background = gtk.gdk.Color.to_string(
+            background = Gdk.Color.to_string(
                                    self.bgpreference.get_color()),
-            border = gtk.gdk.Color.to_string(
+            border = Gdk.Color.to_string(
                                    self.borderpreference.get_color()),
             padding = self.paddingpreference.get_value_as_int(),
             height = self.heightpreference.get_value() / 100.0,
@@ -198,19 +201,19 @@ class Preferences(object):
 
     def save_custom_theme(self, widget, data=None):
         """write the current custom theme to disk"""
-        chooser = gtk.FileChooserDialog('PyRoom', self.window, 
-            gtk.FILE_CHOOSER_ACTION_SAVE,
-            buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-            gtk.STOCK_SAVE, gtk.RESPONSE_OK)
+        chooser = Gtk.FileChooserDialog('PyRoom', self.window, 
+            Gtk.FileChooserAction.SAVE,
+            buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
         )
-        chooser.set_default_response(gtk.RESPONSE_OK)
+        chooser.set_default_response(Gtk.ResponseType.OK)
         chooser.set_current_folder(state['themes_dir'])
-        filter_pattern = gtk.FileFilter()
+        filter_pattern = Gtk.FileFilter()
         filter_pattern.add_pattern('*.theme')
         filter_pattern.set_name(_('Theme Files'))
         chooser.add_filter(filter_pattern)
         res = chooser.run()
-        if res == gtk.RESPONSE_OK:
+        if res == Gtk.ResponseType.OK:
             theme_filename = chooser.get_filename()
             state['gui'].theme.save(theme_filename)
             theme_name = os.path.basename(theme_filename)
@@ -245,16 +248,16 @@ class Preferences(object):
     def customchanged(self, widget):
         """triggered when custom themes are changed, reloads style"""
         self.presetscombobox.set_active(0)
-        for key, value in self.get_custom_data().iteritems():
+        for key, value in self.get_custom_data().items():
             self.customfile.set('theme', key, str(value))
         self.presetchanged(widget)
 
     def fill_pref_dialog(self):
         """load config into the dialog"""
         self.custom_font_preference.set_font_name(
-            config.get('visual', 'custom_font')
+            config.get('visual', 'custom_font', )
         )
-        parse_color = lambda x: gtk.gdk.color_parse(
+        parse_color = lambda x: Gdk.color_parse(
             state['gui'].theme[x]
         )
         self.colorpreference.set_color(parse_color('foreground'))
@@ -274,7 +277,7 @@ class Preferences(object):
     def presetchanged(self, widget, mode=None):
         """some presets have changed, apply those"""
         active_theme_id = self.presetscombobox.get_active()
-        for key, value in self.stylesvalues.iteritems():
+        for key, value in list(self.stylesvalues.items()):
             if value == active_theme_id:
                 active_theme = key
         if active_theme_id == 0:
@@ -287,7 +290,7 @@ class Preferences(object):
         else:
             new_theme = Theme(active_theme)
             state['gui'].theme = new_theme
-            parse_color = lambda x: gtk.gdk.color_parse(
+            parse_color = lambda x: Gdk.color_parse(
                 state['gui'].theme[x]
             )
             self.colorpreference.set_color(parse_color('foreground'))
@@ -318,7 +321,7 @@ class Preferences(object):
 
     def toggle_indent(self, widget):
         """toggle textbox indent"""
-        if config.get('visual', 'indent') == '1':
+        if config.get('visual', 'indent', ) == '1':
             config.set('visual', 'indent', '0')
         else:
             config.set('visual', 'indent', '1')
@@ -333,7 +336,7 @@ class Preferences(object):
             opposite = 1
         config.set('visual', 'showborder', str(opposite))
         state['gui'].apply_theme()
-        
+
     def togglepath(self, widget):
         """toggle full path display in statusbar"""
         pathstate = config.getint('visual', 'showpath')
@@ -363,7 +366,7 @@ class Preferences(object):
 
     def QuitEvent(self, widget, data=None):
         """quit our app"""
-        gtk.main_quit()
+        Gtk.main_quit()
         return False
 
     def kill_preferences(self, widget, data=None):
