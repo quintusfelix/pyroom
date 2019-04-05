@@ -33,7 +33,7 @@ Either unpack the tarball
 or check out our git repo for a development version (we try to keep those
 unbroken and ready for production use)
     
-    $ git clone https://github.com/fheinle/PyRoom
+    $ git clone https://github.com/quintusfelix/PyRoom
 
 From there, you can either run pyroom from commandline
 
@@ -83,5 +83,5 @@ There are a few keys allowing you to perform a few useful commands:
 ## Want to know more?
 
 * PyRoom Website: http://pyroom.org
-* PyRoom project page on github: https://github.com/fheinle/PyRoom
+* PyRoom project page on github: https://github.com/quintusfelix/PyRoom
 * PyRoom IRC-Channel: irc://irc.freenode.net/pyroom - #pyroom on FreeNode
