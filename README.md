@@ -27,24 +27,28 @@ PyRoom is available as a distutils enabled package. Installation procedures
 for those are easy:
 
 Either unpack the tarball 
-    
-    $ tar xvfz pyroom*.tar.gz
+```    
+tar xvfz pyroom*.tar.gz
+```
 
 or check out our git repo for a development version (we try to keep those
 unbroken and ready for production use)
-    
-    $ git clone https://github.com/quintusfelix/PyRoom
+```    
+git clone https://github.com/quintusfelix/PyRoom
+```
 
 From there, you can either run pyroom from commandline
-
-    $ cd pyroom/
-    $ ./pyroom
+```
+cd pyroom/
+./pyroom
+```
 
 Or install it system wide
-
-    $ cd pyroom
-    $ python3 setup.py install # as root
-    $ pyroom
+```
+cd pyroom
+python3 setup.py install # as root
+pyroom
+```
 
 Usage 
 -----
@@ -52,36 +56,37 @@ Usage
 ### Running PyRoom
 
 To run pyroom and instruct it to load some existing files, type:
-
-    $ pyroom /path/to/file1 /other/path/to/file2
+```
+pyroom /path/to/file1 /other/path/to/file2
+```
 
 ### Example Usage
 
 For example, to load PyRoom and instruct it to load the files `article.txt` and
 `blogpost.txt`, type the following:
-
-    $ pyroom article.txt blog.txt
+```
+pyroom article.txt blog.txt
+```
 
 ### Key Bindings
 
 There are a few keys allowing you to perform a few useful commands:
 
-* Control-H: Show help in a new buffer
-* Control-I: Show buffer information
-* Control-M: Minimize buffer
-* Control-N: Create a new buffer
-* Control-O: Open a file in a new buffer
-* Control-Q: Quit
-* Control-S: Save current buffer
-* Control-Shift-S: Save current buffer as
-* Control-W: Close buffer and exit if it was the last buffer
-* Control-Y: Redo last typing
-* Control-Z: Undo last typing
-* Control-Page Up: Switch to previous buffer
-* Control-Page Down: Switch to next buffer
+* <kbd>Ctrl</kbd>+<kbd>H</kbd>: Show help in a new buffer
+* <kbd>Ctrl</kbd>+<kbd>I</kbd>: Show buffer information
+* <kbd>Ctrl</kbd>+<kbd>M</kbd>: Minimize buffer
+* <kbd>Ctrl</kbd>+<kbd>N</kbd>: Create a new buffer
+* <kbd>Ctrl</kbd>+<kbd>O</kbd>: Open a file in a new buffer
+* <kbd>Ctrl</kbd>+<kbd>Q</kbd>: Quit
+* <kbd>Ctrl</kbd>+<kbd>S</kbd>: Save current buffer
+* <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>: Save current buffer as
+* <kbd>Ctrl</kbd>+<kbd>W</kbd>: Close buffer and exit if it was the last buffer
+* <kbd>Ctrl</kbd>+<kbd>Y</kbd>: Redo last typing
+* <kbd>Ctrl</kbd>+<kbd>Z</kbd>: Undo last typing
+* <kbd>Ctrl</kbd>+<kbd>Page Up</kbd>: Switch to previous buffer
+* <kbd>Ctrl</kbd>+<kbd>Page Down</kbd>: Switch to next buffer
 
 ## Want to know more?
 
 * PyRoom Website: http://pyroom.org
 * PyRoom project page on github: https://github.com/quintusfelix/PyRoom
-* PyRoom IRC-Channel: irc://irc.freenode.net/pyroom - #pyroom on FreeNode
