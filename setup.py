@@ -45,7 +45,7 @@ class InstallData(install_data):
 
 setup(
   name='PyRoom',
-  version = '0.4.2',
+  version = '0.5.0',
   url = url,
   author = author,
   description = 'PyRoom is a distraction-free, fullscreen text editor',

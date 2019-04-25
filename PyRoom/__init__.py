@@ -2,7 +2,7 @@
 
 """ translation setup """
 
-__VERSION__ = '0.4.2'
+__VERSION__ = '0.5.0'
 import locale
 try:
     locale.setlocale(locale.LC_ALL, '')
