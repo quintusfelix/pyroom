@@ -562,8 +562,7 @@ Open those instead of the original file?''')
             buffer_file = open(filename_to_open, 'r')
             buf = self.buffers[self.current]
             buf.begin_not_undoable_action()
-            utf8 = str(buffer_file.read(), 'utf-8')
-            buf.set_text(utf8)
+            buf.set_text(buffer_file.read())
             buf.end_not_undoable_action()
             buffer_file.close()
         except IOError as unable_to_open_file:
