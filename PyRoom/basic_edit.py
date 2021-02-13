@@ -30,7 +30,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 from gi.repository import GObject
 import os
-import urllib
+import urllib.parse
 
 from .pyroom_error import PyroomError
 from .gui import GUI
@@ -562,8 +562,7 @@ Open those instead of the original file?''')
             buffer_file = open(filename_to_open, 'r')
             buf = self.buffers[self.current]
             buf.begin_not_undoable_action()
-            utf8 = str(buffer_file.read(), 'utf-8')
-            buf.set_text(utf8)
+            buf.set_text(buffer_file.read())
             buf.end_not_undoable_action()
             buffer_file.close()
         except IOError as unable_to_open_file:
@@ -588,19 +587,18 @@ the file.')
             if buf.filename != FILE_UNNAMED:
                 buffer_file = open(buf.filename, 'w')
                 txt = buf.get_text(buf.get_start_iter(),
-                                     buf.get_end_iter())
+                                     buf.get_end_iter(), False)
                 buffer_file.write(txt)
                 if self.recent_manager:
+                    recent_data = Gtk.RecentData()
+                    recent_data.mime_type = 'text/plain'
+                    recent_data.app_name = 'pyroom'
+                    recent_data.app_exec = '%F'
+                    recent_data.is_private = False
+                    recent_data.display_name = os.path.basename(buf.filename)
+
                     self.recent_manager.add_full(
-                        "file://" + urllib.parse.quote(buf.filename),
-                        {
-                            'mime_type':'text/plain',
-                            'app_name':'pyroom',
-                            'app_exec':'%F',
-                            'is_private':False,
-                            'display_name':os.path.basename(buf.filename),
-                        }
-                    )
+                        "file://" + urllib.parse.quote(buf.filename),recent_data)
                 buffer_file.close()
                 buf.begin_not_undoable_action()
                 buf.end_not_undoable_action()
