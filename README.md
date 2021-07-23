@@ -1,5 +1,7 @@
-PyRoom Project
+PyRoom Project 
 ==============
+A fork due to inactivity by the original maintainer
+---------------------------------------------------
 
 PyRoom is a fullscreen simple text editor, without a toolbar, a menubar or
 anything that would distract the user from his most important task: writing.
