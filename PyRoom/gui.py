@@ -59,7 +59,8 @@ class Theme(dict):
         dict.__init__(self)
         theme_filename = self._lookup_theme(theme_name)
         if not theme_filename:
-            raise PyroomError(_('theme not found: %s') % theme_name)
+            print(_('theme not found: %s') % theme_name) #I want the programm to load if not found, it switches to a default theme
+            theme_filename = self._lookup_theme("green")
         theme_file = configparser.ConfigParser()
         theme_file.read(theme_filename)
         self.update(theme_file.items('theme'))

@@ -127,7 +127,13 @@ class Preferences(object):
             self.presetscombobox.append_text(theme_name)
         if active_style == 'custom':
             self.save_custom_button.set_sensitive(True)
-        self.presetscombobox.set_active(self.stylesvalues[active_style])
+        try:
+            self.presetscombobox.set_active(self.stylesvalues[active_style])
+        except:
+            temp_style = active_style
+            active_style = "green"
+            self.presetscombobox.set_active(self.stylesvalues[active_style])
+            active_style = temp_style
         self.fill_pref_dialog()
 
         # Connecting interface's signals

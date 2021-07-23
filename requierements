@@ -1,3 +1,36 @@
 pygi
 xdg
 PyGObject
+
+Traceback (most recent call last):
+
+  File "/usr/lib/python3.9/configparser.py", line 846, in items
+    d.update(self._sections[section])
+
+KeyError: 'theme'
+
+
+During handling of the above exception, another exception occurred:
+
+
+Traceback (most recent call last):
+
+  File "/home/fridolin/dev/pyroom/pyroom", line 38, in <module>
+    sys.exit(PyRoom.cmdline.main())
+
+  File "/home/fridolin/dev/pyroom/PyRoom/cmdline.py", line 63, in main
+    state['edit_instance'] = BasicEdit()
+
+  File "/home/fridolin/dev/pyroom/PyRoom/basic_edit.py", line 381, in __init__
+    gui = GUI()
+
+  File "/home/fridolin/dev/pyroom/PyRoom/gui.py", line 163, in __init__
+    self.theme = Theme(theme_name)
+
+  File "/home/fridolin/dev/pyroom/PyRoom/gui.py", line 66, in __init__
+    self.update(theme_file.items('theme'))
+
+  File "/usr/lib/python3.9/configparser.py", line 849, in items
+    raise NoSectionError(section)
+
+configparser.NoSectionError: No section: 'theme'
