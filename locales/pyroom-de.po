@@ -184,7 +184,7 @@ msgstr ""
 
 #: trunk/PyRoom/pyroom_error.py:49
 msgid "Error"
-msgstr "FEhler"
+msgstr "Fehler"
 
 #: trunk/PyRoom/pyroom_error.py:52
 msgid "Details..."

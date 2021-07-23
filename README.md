@@ -96,3 +96,4 @@ There are a few keys allowing you to perform a few useful commands:
 
 * PyRoom Website: http://pyroom.org
 * PyRoom project page on github: https://github.com/quintusfelix/PyRoom
+* Active fork rn: https://github.com/LordBurtz/pyroom
