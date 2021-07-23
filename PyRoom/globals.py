@@ -28,12 +28,12 @@ Configuration, state keeping, etc
 
 import os
 from sys import platform
+import appdirs
 
 if platform == 'win32':
     data_home, config_home = (os.environ['APPDATA'],) * 2
 else:
-    from xdg.BaseDirectory import xdg_config_home as config_home
-    from xdg.BaseDirectory import xdg_data_home as data_home
+    data_home = str(os.path.expanduser("~"))
 
 # avoiding circular imports, actual import is below!
 #from utils import FailsafeConfigParser
@@ -60,7 +60,7 @@ def get_gnome_fonts():
 state = dict(
     gnome_fonts = get_gnome_fonts(),
     absolute_path = os.path.dirname(os.path.abspath(__file__)),
-    conf_dir = os.path.join(config_home, 'pyroom'),
+    conf_dir = str(appdirs.user_config_dir("pyroom")), #added this, should be plattform independent although not tested..
     data_dir = os.path.join(data_home, 'pyroom'),
     themes_dir = os.path.join(data_home, 'pyroom', 'themes'),
     # XXX: works only in linux

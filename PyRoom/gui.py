@@ -33,7 +33,7 @@ import configparser
 import os
 from sys import platform
 #I get the error that xdg.BaseDirectory is not found so I intruduced a more crossplattform solution here
-data_home = os.path.expanduser("~") # as this is working on windows (urrgh) as well as on *NIX I removed the win32 solution
+data_home = str(os.path.expanduser("~")) # as this is working on windows (urrgh) as well as on *NIX I removed the win32 solution
 
 from .pyroom_error import PyroomError
 from .globals import state, config
