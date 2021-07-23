@@ -7,9 +7,13 @@ anything that would distract the user from his most important task: writing.
 Dependencies
 ------------
 
-PyRoom depends on Python 3, PyGi and XDG bindings for Python (python3-xdg). Please
+PyRoom depends on Python 3, PyGi and XDG bindings for Python (xdg). Please
 refer to your system documentation for information on how to install these
 modules if they're not currently available.
+Optional: install via  
+```
+pip install -r requirements.txt
+```
 
 Optional dependencies
 ---------------------
