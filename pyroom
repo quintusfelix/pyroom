@@ -39,7 +39,7 @@ def start():
     if (len(sys.argv) > 1 and  sys.argv[1] == "debug"):
         import pdb
 
-        pdb.set_trace()
+        pdb.set_trace() #TODO: add a real debug mode
     try:
         import gi
         from gi.repository import Gtk, Gdk
