@@ -34,16 +34,25 @@ Based on code posted on ubuntu forums by NoWhereMan (www.nowhereland.it)
 
 import sys, PyRoom.cmdline
 
-try:
-    import gi
-    from gi.repository import Gtk, Gdk
-    import appdirs
-except:
-    print("Error: Not all dependencies met!")
-    print("Install them using pip install -r requirements.txt")
-    sys.exit(1)
 
-try:
-    sys.exit(PyRoom.cmdline.main())
-except KeyboardInterrupt:
-    sys.exit(1)
+def start():
+    if (len(sys.argv) > 1 and  sys.argv[1] == "debug"):
+        import pdb
+
+        pdb.set_trace()
+    try:
+        import gi
+        from gi.repository import Gtk, Gdk
+        import appdirs
+    except:
+        print("Error: Not all dependencies met!")
+        print("Install them using pip install -r requirements.txt")
+        sys.exit(1)
+
+    try:
+        sys.exit(PyRoom.cmdline.main())
+    except KeyboardInterrupt:
+        sys.exit(1)
+
+if __name__ == '__main__':
+    start()
