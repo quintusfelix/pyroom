@@ -5,6 +5,8 @@ A fork due to inactivity by the original maintainer
 
 PyRoom is a fullscreen simple text editor, without a toolbar, a menubar or
 anything that would distract the user from his most important task: writing.
+Note: as of writing the testing branch will have new features and 
+master will recieve some kind of longer term work, that should work
 
 Dependencies
 ------------
