@@ -35,6 +35,15 @@ Based on code posted on ubuntu forums by NoWhereMan (www.nowhereland.it)
 import sys, PyRoom.cmdline
 
 try:
+    import gi
+    from gi.repository import Gtk, gtk, GObject, Pango
+    import appdirs
+except:
+    print("Error: Not all dependencies met!")
+    print("Install them using pip install -r requirements.txt")
+    sys.exit(1)
+
+try:
     sys.exit(PyRoom.cmdline.main())
 except KeyboardInterrupt:
     sys.exit(1)
