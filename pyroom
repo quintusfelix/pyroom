@@ -36,7 +36,7 @@ import sys, PyRoom.cmdline
 
 try:
     import gi
-    from gi.repository import Gtk, gtk, GObject, Pango
+    from gi.repository import Gtk, Gdk
     import appdirs
 except:
     print("Error: Not all dependencies met!")
