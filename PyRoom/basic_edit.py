@@ -29,8 +29,10 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 from gi.repository import GObject
+import gtk
 import os
 import urllib
+import urllib.parse
 
 from .pyroom_error import PyroomError
 from .gui import GUI
@@ -383,7 +385,7 @@ class BasicEdit(object):
         state['gui'] = gui
         self.preferences = Preferences()
         try:
-            self.recent_manager = Gtk.RecentManager.get_default()
+            self.recent_manager = gtk.recent_manager_get_default() #introducing this, the old method is no longer available lol.. what was the prev def thinking
         except AttributeError:
             self.recent_manager = None
         self.status = gui.status
@@ -620,8 +622,10 @@ the file.')
                 errortext += _(' You do not have permission to write to \
 the file.')
             raise PyroomError(errortext)
-        except:
-            raise PyroomError(_('Unable to save %s\n') % buf.filename)
+
+        # WHY TF WOULD YOU CATCH AN ERROR HERE WITHOUT TELLING ANY GODDAMN SOUL WHY ITS OCCURING aaargh :(
+        # this took me some time (now using the pyroom undefined error handling
+
         buf.modified = False
 
     def save_file_as(self):

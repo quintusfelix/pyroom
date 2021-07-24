@@ -4,11 +4,21 @@ PyGObject
 
 Traceback (most recent call last):
 
-  File "/home/fridolin/dev/pyroom/PyRoom/autosave.py", line 50, in autosave_timeout
-    autosave(edit_instance)
+  File "/home/fridolin/dev/pyroom/PyRoom/basic_edit.py", line 110, in eat
+    args[0]()
 
-  File "/home/fridolin/dev/pyroom/PyRoom/autosave.py", line 69, in autosave
-    backup_file = open(
+  File "/home/fridolin/dev/pyroom/PyRoom/basic_edit.py", line 599, in save_file
+    self.recent_manager.add_full(
 
-ValueError: must have exactly one of create/read/write/append mode
+TypeError: argument recent_data: Expected Gtk.RecentData, but got dict
+
+Traceback (most recent call last):
+
+  File "/home/fridolin/dev/pyroom/PyRoom/basic_edit.py", line 110, in eat
+    args[0]()
+
+  File "/home/fridolin/dev/pyroom/PyRoom/basic_edit.py", line 599, in save_file
+    self.recent_manager.add_full(
+
+TypeError: Gtk.RecentManager.add_full() takes exactly 3 arguments (2 given)
 
