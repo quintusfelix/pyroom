@@ -559,13 +559,13 @@ Open those instead of the original file?''')
         filename_to_open = check_backup(filename)
 
         try:
-            buffer_file = open(filename_to_open, 'r')
-            buf = self.buffers[self.current]
-            buf.begin_not_undoable_action()
-            utf8 = str(buffer_file.read(), 'utf-8')
-            buf.set_text(utf8)
-            buf.end_not_undoable_action()
-            buffer_file.close()
+            with open(filename_to_open, "r") as buffer_file:
+                buf = self.buffers[self.current]
+                buf.begin_not_undoable_action()
+                utf8 = str(buffer_file.read(), 'utf-8')
+                buf.set_text(utf8)
+                buf.end_not_undoable_action()
+
         except IOError as unable_to_open_file:
             (errno, strerror) = unable_to_open_file.args
             errortext = _('Unable to open %(filename)s.') % {
