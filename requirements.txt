@@ -1,3 +1,14 @@
 pygi
 xdg
 PyGObject
+
+Traceback (most recent call last):
+
+  File "/home/fridolin/dev/pyroom/PyRoom/autosave.py", line 50, in autosave_timeout
+    autosave(edit_instance)
+
+  File "/home/fridolin/dev/pyroom/PyRoom/autosave.py", line 69, in autosave
+    backup_file = open(
+
+ValueError: must have exactly one of create/read/write/append mode
+

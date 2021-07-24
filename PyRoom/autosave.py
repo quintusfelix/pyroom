@@ -73,7 +73,7 @@ def autosave(edit_instance):
             try:
                 try:
                     backup_file.write(
-                        buf.get_text(buf.get_start_iter(), buf.get_end_iter())
+                        buf.get_text(buf.get_start_iter(), buf.get_end_iter(), False)
                     )
                 except IOError:
                     raise PyroomError(_("Could not autosave file %s") % 
