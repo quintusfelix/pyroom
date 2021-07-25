@@ -96,8 +96,8 @@ There are a few keys allowing you to perform a few useful commands:
 
 ## Supported Plattforms
 
-*Arch linux (i use this btw)
-*Fedora linux
+* Arch linux (i use this btw)
+* Fedora linux
 
 ## Want to know more?
 
