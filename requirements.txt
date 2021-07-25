@@ -1,3 +1,4 @@
 pygi
 xdg
 PyGObject
+appdirs
