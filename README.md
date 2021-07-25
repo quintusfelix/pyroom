@@ -42,7 +42,7 @@ tar xvfz pyroom*.tar.gz
 or check out our git repo for a development version (we try to keep those
 unbroken and ready for production use)
 ```    
-git clone https://github.com/quintusfelix/PyRoom
+git clone https://github.com/LordBurtz/pyroom
 ```
 
 From there, you can either run pyroom from commandline
