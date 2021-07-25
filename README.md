@@ -94,6 +94,10 @@ There are a few keys allowing you to perform a few useful commands:
 * <kbd>Ctrl</kbd>+<kbd>Page Up</kbd>: Switch to previous buffer
 * <kbd>Ctrl</kbd>+<kbd>Page Down</kbd>: Switch to next buffer
 
+## Supported Plattforms
+
+Right now only tested for arch and fedora linux
+
 ## Want to know more?
 
 * PyRoom Website: http://pyroom.org
