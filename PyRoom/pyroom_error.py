@@ -32,7 +32,9 @@ import traceback
 
 class PyroomError(Exception):
     """our nice little exception"""
-    pass
+    message = None
+    def __init__(self, msg):
+        self.message = msg
 
 def handle_error(exception_type, exception_value, exception_traceback):
     """display errors to the end user using dialog boxes"""
@@ -42,8 +44,8 @@ def handle_error(exception_type, exception_value, exception_traceback):
         return
     else: # uncaught exception in code
         message = _("""There has been an uncaught exception in pyroom.\n
-This is most likely a programming error. \
-Please submit a bug report to launchpad""")
+                    This is most likely a programming error. \
+                    Please submit a bug report to launchpad""")
 
     error_dialog = Gtk.MessageDialog(parent=None, flags=Gtk.DialogFlags.MODAL,
                 type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.NONE,
@@ -82,8 +84,8 @@ Please submit a bug report to launchpad""")
     )
     details_buffer.set_text(printable_traceback)
     details_textview.set_size_request(
-        Gdk.Screen.width()/2,
-        Gdk.Screen.height()/3
+        Gdk.Screen.width() /1.5,  #/2
+        Gdk.Screen.height()/2.25  #/3 testing new spacing to allow for more erros :/
     )
 
     error_dialog.details = frame

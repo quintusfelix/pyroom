@@ -29,8 +29,9 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 from gi.repository import GObject
+import gtk
 import os
-import urllib
+import urllib.parse
 
 from .pyroom_error import PyroomError
 from .gui import GUI
@@ -54,7 +55,8 @@ _('Control-W: Close buffer and exit if it was the last buffer'),
 _('Control-Y: Redo last typing'),
 _('Control-Z: Undo last typing'),
 _('Control-Page Up: Switch to previous buffer'),
-_('Control-Page Down: Switch to next buffer'), ])
+_('Control-Page Down: Switch to next buffer'),
+_('Control-K: switch to OO syntax highlighting'), ])
 
 HELP = \
     _("""PyRoom - distraction free writing
@@ -382,7 +384,7 @@ class BasicEdit(object):
         state['gui'] = gui
         self.preferences = Preferences()
         try:
-            self.recent_manager = Gtk.RecentManager.get_default()
+            self.recent_manager = gtk.recent_manager_get_default() #introducing this, the old method is no longer available lol.. what was the prev def thinking
         except AttributeError:
             self.recent_manager = None
         self.status = gui.status
@@ -559,13 +561,16 @@ Open those instead of the original file?''')
         filename_to_open = check_backup(filename)
 
         try:
-            buffer_file = open(filename_to_open, 'r')
-            buf = self.buffers[self.current]
-            buf.begin_not_undoable_action()
-            utf8 = str(buffer_file.read(), 'utf-8')
-            buf.set_text(utf8)
-            buf.end_not_undoable_action()
-            buffer_file.close()
+            with open(filename_to_open, "r") as buffer_file:
+                buf = self.buffers[self.current]
+                buf.begin_not_undoable_action()
+                test = try_utf8(buffer_file)
+                if test is None: #added to allow non utf8 to be opened
+                    buf.set_text(buffer_file.read())
+                else:
+                    buf.set_text = test
+                buf.end_not_undoable_action()
+
         except IOError as unable_to_open_file:
             (errno, strerror) = unable_to_open_file.args
             errortext = _('Unable to open %(filename)s.') % {
@@ -588,19 +593,16 @@ the file.')
             if buf.filename != FILE_UNNAMED:
                 buffer_file = open(buf.filename, 'w')
                 txt = buf.get_text(buf.get_start_iter(),
-                                     buf.get_end_iter())
+                                     buf.get_end_iter(), False)
                 buffer_file.write(txt)
                 if self.recent_manager:
-                    self.recent_manager.add_full(
-                        "file://" + urllib.parse.quote(buf.filename),
-                        {
-                            'mime_type':'text/plain',
-                            'app_name':'pyroom',
-                            'app_exec':'%F',
-                            'is_private':False,
-                            'display_name':os.path.basename(buf.filename),
-                        }
-                    )
+                    recent_data = Gtk.RecentData()
+                    recent_data.mime_type = 'text/plain'
+                    recent_data.app_name = 'pyroom'
+                    recent_data.app_exec = '%F'
+                    recent_data.is_private = False
+                    recent_data.display_name = os.path.basename(buf.filename)
+                    self.recent_manager.add_full( "file://" + urllib.parse.quote(buf.filename), recent_data)
                 buffer_file.close()
                 buf.begin_not_undoable_action()
                 buf.end_not_undoable_action()
@@ -616,8 +618,10 @@ the file.')
                 errortext += _(' You do not have permission to write to \
 the file.')
             raise PyroomError(errortext)
-        except:
-            raise PyroomError(_('Unable to save %s\n') % buf.filename)
+
+        # WHY TF WOULD YOU CATCH AN ERROR HERE WITHOUT TELLING ANY GODDAMN SOUL WHY ITS OCCURING aaargh :(
+        # this took me some time (now using the pyroom undefined error handling
+
         buf.modified = False
 
     def save_file_as(self):
@@ -795,3 +799,9 @@ continue editing your document.")
     def dialog_minimize(self):
         """ Minimize (iconify) the window """
         state['gui'].iconify()
+
+def try_utf8(data): #checking if data is utf parseable
+    try:
+        return data.decode("utf-8")
+    except:
+        return None

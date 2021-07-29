@@ -1,15 +1,23 @@
-PyRoom Project
+PyRoom Project 
 ==============
+A fork due to inactivity by the original maintainer
+---------------------------------------------------
 
 PyRoom is a fullscreen simple text editor, without a toolbar, a menubar or
 anything that would distract the user from his most important task: writing.
+Note: as of writing the testing branch will have new features and 
+master will recieve some kind of longer term work, that should work
 
 Dependencies
 ------------
 
-PyRoom depends on Python 3, PyGi and XDG bindings for Python (python3-xdg). Please
+PyRoom depends on Python 3, PyGi and XDG bindings for Python (xdg). Please
 refer to your system documentation for information on how to install these
 modules if they're not currently available.
+Optional: install via  
+```
+pip install -r requirements.txt
+```
 
 Optional dependencies
 ---------------------
@@ -34,7 +42,7 @@ tar xvfz pyroom*.tar.gz
 or check out our git repo for a development version (we try to keep those
 unbroken and ready for production use)
 ```    
-git clone https://github.com/quintusfelix/PyRoom
+git clone https://github.com/LordBurtz/pyroom
 ```
 
 From there, you can either run pyroom from commandline
@@ -86,7 +94,13 @@ There are a few keys allowing you to perform a few useful commands:
 * <kbd>Ctrl</kbd>+<kbd>Page Up</kbd>: Switch to previous buffer
 * <kbd>Ctrl</kbd>+<kbd>Page Down</kbd>: Switch to next buffer
 
+## Supported Plattforms
+
+* Arch linux (i use this btw)
+* Fedora linux
+
 ## Want to know more?
 
 * PyRoom Website: http://pyroom.org
 * PyRoom project page on github: https://github.com/quintusfelix/PyRoom
+* Active fork rn: https://github.com/LordBurtz/pyroom

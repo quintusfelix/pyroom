@@ -1,0 +1,4 @@
+pygi
+xdg
+PyGObject
+appdirs
